@@ -1,11 +1,12 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/jasonlvhit/gocron"
 	"servicemonitor/controllers"
 	"servicemonitor/db"
 	"servicemonitor/models"
-
-	"github.com/gin-gonic/gin"
+	"servicemonitor/monitor"
 )
 
 func main() {
@@ -18,6 +19,9 @@ func main() {
 	db.InsertDummyEndPoints(context)
 
 	r := gin.Default()
+	monitor.RecordHealth(context)
+	gocron.Every(5).Second().Do(monitor.RecordHealth, context)
+	gocron.Start()
 	apiRoutes := r.Group("/monitor")
 	// Routes
 	apiRoutes.GET("/service", controllers.GetServiceInfos(context))
