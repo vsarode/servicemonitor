@@ -15,17 +15,17 @@ func main() {
 	context := models.Context{
 		Db: database,
 	}
+
 	db.SetupSchema(context)
 	db.InsertDummyEndPoints(context)
-
 	r := gin.Default()
+	r.Use(controllers.GetAssets())
 	monitor.RecordHealth(context)
 	gocron.Every(5).Second().Do(monitor.RecordHealth, context)
 	gocron.Start()
 	apiRoutes := r.Group("/monitor")
 	// Routes
 	apiRoutes.GET("/service", controllers.GetServiceInfos(context))
-	apiRoutes.GET("/service/:id", controllers.GetServiceInfo(context))
 	apiRoutes.POST("/service", controllers.CreateServiceInfo(context))
 	apiRoutes.GET("/servicestat", controllers.GetHelthStats(context))
 

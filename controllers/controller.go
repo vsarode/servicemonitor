@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"servicemonitor/models"
 	"servicemonitor/monitor"
-
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -87,4 +87,9 @@ func CreateServiceInfo(ctx models.Context) func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"data": serviceInfo})
 		monitor.RecordHealth(ctx)
 	}
+}
+
+// GetAssets
+func GetAssets() gin.HandlerFunc {
+	return static.Serve("/", static.LocalFile("./web/build", true))
 }
