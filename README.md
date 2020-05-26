@@ -1,6 +1,10 @@
 # servicemonitor
 Service to monitor service APIS, along with deatails like response time and status.
 
+**Steps to test**
+
+``` go test ./... -v ```
+
 **Steps to run**
 
 ```1) docker build --tag <tag_name> .```
