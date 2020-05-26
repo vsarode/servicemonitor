@@ -1,12 +1,14 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"github.com/jasonlvhit/gocron"
-	"servicemonitor/controllers"
+	"log"
+	"os"
 	"servicemonitor/db"
 	"servicemonitor/models"
 	"servicemonitor/monitor"
+	router2 "servicemonitor/router"
 )
 
 func main() {
@@ -15,20 +17,25 @@ func main() {
 	context := models.Context{
 		Db: database,
 	}
-
+	defer database.Close()
+	file, err := os.Open("config/local.json")
+	if err != nil {
+		log.Println("Error while open file! Error:", err.Error())
+		panic(err)
+	}
+	decoder := json.NewDecoder(file)
+	config := models.Config{}
+	err = decoder.Decode(&config)
+	if err != nil {
+		log.Println("Error while reading config! Error:", err.Error())
+		panic(err)
+	}
 	db.SetupSchema(context)
 	db.InsertDummyEndPoints(context)
-	r := gin.Default()
-	r.Use(controllers.GetAssets())
 	monitor.RecordHealth(context)
-	gocron.Every(5).Second().Do(monitor.RecordHealth, context)
+	gocron.Every(config.CronRerunTimeInSecond).Second().Do(monitor.RecordHealth, context)
 	gocron.Start()
-	apiRoutes := r.Group("/monitor")
-	// Routes
-	apiRoutes.GET("/service", controllers.GetServiceInfos(context))
-	apiRoutes.POST("/service", controllers.CreateServiceInfo(context))
-	apiRoutes.GET("/servicestat", controllers.GetHelthStats(context))
-
+	router := router2.SetupRouter(context)
 	// Run the server
-	r.Run()
+	router.Run()
 }

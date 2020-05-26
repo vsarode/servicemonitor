@@ -7,7 +7,7 @@ import (
 )
 
 func GetDb() *gorm.DB {
-	database, err := gorm.Open("sqlite3", "test.db")
+	database, err := gorm.Open("sqlite3", "monitor.db")
 	if err != nil {
 		println("Failed to connect to database!")
 		panic(err)
@@ -25,10 +25,12 @@ func InsertDummyEndPoints(context models.Context) {
 		{
 			URL: "https://golang.org/pkg/time/#example_Time_Format",
 			ServiceName: "Golang",
+			ResponseCode: 200,
 		},
 		{
 			URL: "https://www.youtube.com/",
 			ServiceName: "Youtube",
+			ResponseCode: 200,
 		},
 	}
 	for _, endPoint := range endPoints {

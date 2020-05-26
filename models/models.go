@@ -6,9 +6,10 @@ import (
 
 //ServiceInfo ...
 type ServiceInfo struct {
-	ID          uint   `json:"id" gorm:"primary_key"`
-	URL         string `json:"url" gorm:"unique;not null"`
-	ServiceName string `json: "serviceName"`
+	ID           uint   `json:"id" gorm:"primary_key"`
+	URL          string `json:"url" gorm:"unique;not null"`
+	ServiceName  string `json: "serviceName"`
+	ResponseCode int    `json: "responseCode"`
 }
 
 //HelthStat ...
@@ -28,4 +29,8 @@ type ServiceHelthResponse struct {
 
 type Context struct {
 	Db *gorm.DB
+}
+
+type Config struct {
+	CronRerunTimeInSecond uint64
 }

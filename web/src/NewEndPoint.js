@@ -45,10 +45,15 @@ export default class NewEndPoint extends React.Component {
                             <Form.Label>Service name</Form.Label>
                             <Form.Control ref="serviceName" placeholder="Enter service name"/>
                         </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Response Code</Form.Label>
+                            <Form.Control ref="responseCode" type="number" placeholder="Enter expected response code"/>
+                        </Form.Group>
                         <Button variant="primary" size="sm" onClick={() => {
                             this.addEndPoint({
                                 url: this.refs.url.value,
                                 serviceName: this.refs.serviceName.value,
+                                responseCode:  parseInt(this.refs.responseCode.value),
                             })
                         }}>
                             Submit

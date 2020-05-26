@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func GetEndPointHealth(endPoint models.ServiceInfo) *models.HelthStat {
+func getServiceHealth(endPoint models.ServiceInfo) *models.HelthStat {
 	startTime := time.Now()
 	resp, err := http.Get(endPoint.URL)
 	if err != nil {
@@ -15,7 +15,7 @@ func GetEndPointHealth(endPoint models.ServiceInfo) *models.HelthStat {
 		return nil
 	}
 	status := false
-	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+	if resp.StatusCode == endPoint.ResponseCode {
 		status = true
 	}
 	health := &models.HelthStat{
@@ -27,23 +27,23 @@ func GetEndPointHealth(endPoint models.ServiceInfo) *models.HelthStat {
 	return health
 }
 
-func GetEndPointsHealth(endPoints []models.ServiceInfo) []*models.HelthStat {
-	var results []*models.HelthStat
+func getAllServicesHealth(endPoints []models.ServiceInfo) []*models.HelthStat {
+	var serviceHelths []*models.HelthStat
 	for _, e := range endPoints {
-		health := GetEndPointHealth(e)
+		health := getServiceHealth(e)
 		if health == nil {
-			log.Println("Error in getendpointhelth for:", e)
+			log.Println("Error in getServiceHealth for:", e)
 		} else {
-			results = append(results, health)
+			serviceHelths = append(serviceHelths, health)
 		}
 	}
-	return results
+	return serviceHelths
 }
 
 func RecordHealth(ctx models.Context) {
 	var endpoints []models.ServiceInfo
 	ctx.Db.Find(&endpoints)
-	healthRecords := GetEndPointsHealth(endpoints)
+	healthRecords := getAllServicesHealth(endpoints)
 	for _, record := range healthRecords {
 		ctx.Db.Create(record)
 	}
