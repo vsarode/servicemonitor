@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/jasonlvhit/gocron"
 	"log"
 	"os"
@@ -8,7 +9,6 @@ import (
 	"servicemonitor/models"
 	"servicemonitor/monitor"
 	router2 "servicemonitor/router"
-	"strconv"
 )
 
 func main() {
@@ -18,15 +18,22 @@ func main() {
 		Db: database,
 	}
 	defer database.Close()
-	cronRerunTimeInSeconds, err := strconv.ParseInt(os.Getenv("cron"), 10, 64)
+	file, err := os.Open("config/local.json")
 	if err != nil {
-		log.Println("Error while geting value from env! Error:", err.Error())
+		log.Println("Error while open file! Error:", err.Error())
+		panic(err)
+	}
+	decoder := json.NewDecoder(file)
+	config := models.Config{}
+	err = decoder.Decode(&config)
+	if err != nil {
+		log.Println("Error while reading config! Error:", err.Error())
 		panic(err)
 	}
 	db.SetupSchema(context)
 	db.InsertDummyEndPoints(context)
 	monitor.RecordHealth(context)
-	gocron.Every(uint64(cronRerunTimeInSeconds)).Second().Do(monitor.RecordHealth, context)
+	gocron.Every(config.CronRerunTimeInSecond).Second().Do(monitor.RecordHealth, context)
 	gocron.Start()
 	router := router2.SetupRouter(context)
 	// Run the server
